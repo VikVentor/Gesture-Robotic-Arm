@@ -1,0 +1,57 @@
+#include <MPU6050.h>
+#include <Servo.h>
+
+
+Servo myservo1;  // create servo object to control a servo
+Servo myservo2;  // create servo object to control a servo
+MPU6050 mpu;
+int flagpitch = 0;
+int flagroll = 0;
+int steprate = 1;
+
+unsigned long timer = 0; // Timers
+float timeStep = 0.01;
+
+
+float pitch = 0; // Pitch, Roll and Yaw values
+float roll = 0;
+
+
+void setup()
+{
+  myservo1.attach(9, 600, 2300); // (pin, min, max) servo
+  myservo2.attach(10, 600, 2300); // (pin, min, max) servo
+  Serial.begin(115200);
+  while (!mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G))  // Initialize MPU6050
+  {
+    Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
+    delay(500);
+  }
+ // mpu.setThreshold(3);   // Default 3. If you don't want use threshold, comment this line or set 0.
+}
+
+void loop()
+{
+  timer = millis();
+  Vector norm = mpu.readNormalizeGyro();  // Read normalized values 
+  pitch = pitch + norm.YAxis * timeStep; // Calculate Pitch and Roll
+  roll = roll + norm.XAxis * timeStep;
+ 
+ controlfunc2(pitch, roll);   
+  //print the pitch and roll
+  Serial.print(" Pitch = ");
+  Serial.print(pitch);
+  Serial.print(" Roll = ");
+  Serial.println(roll);
+  delay((timeStep * 1000) - (millis() - timer));  // Wait to full timeStep period
+}
+
+
+ void controlfunc2(float,float) {
+  myservo1.write(pitch+90);
+  myservo2.write(roll+90);
+  Serial.print(" Servo1 = ");
+  Serial.print(pitch+90);
+  Serial.print(" Servo2 = ");
+  Serial.println(roll+90);
+}   
